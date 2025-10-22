@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Dashboard - Oilseed Platform{% endblock %}
+
+{% block content %}
+<h1 style="color: #2ecc71; margin-bottom: 2rem;">
+    <i class="fas fa-tractor"></i> Farmer Dashboard
+</h1>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-line"></i> AI Price Predictor
+        </div>
+        <div class="form-group">
+            <label class="form-label">Select Crop Type</label>
+            <select id="cropType" class="form-control">
+                <option value="soybean">Soybean</option>
+                <option value="groundnut">Groundnut</option>
+                <option value="mustard">Mustard</option>
+                <option value="sunflower">Sunflower</option>
+            </select>
+        </div>
+        <button onclick="predictPrice()" class="btn btn-primary">
+            <i class="fas fa-brain"></i> Predict Prices
+        </button>
+        <div id="priceChart" style="margin-top: 2rem;"></div>
+        <div id="priceData" style="margin-top: 1rem;"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-cloud-sun"></i> Crop Advisory
+        </div>
+        <div id="advisoryContent">
+            <p style="color: #666;">Select a crop and click "Predict Prices" to see advisory information</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-dollar-sign"></i> Sell Your Crop
+    </div>
+    <div class="grid grid-2">
+        <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" id="farmerName" class="form-control" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Crop Type</label>
+            <select id="sellCropType" class="form-control">
+                <option value="soybean">Soybean</option>
+                <option value="groundnut">Groundnut</option>
+                <option value="mustard">Mustard</option>
+                <option value="sunflower">Sunflower</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Quantity (kg)</label>
+            <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" min="0">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Price (₹/quintal)</label>
+            <input type="number" id="price" class="form-control" placeholder="Enter price" min="0">
+        </div>
+    </div>
+    <button onclick="sellCrop()" class="btn btn-primary">
+        <i class="fas fa-shopping-cart"></i> Sell Crop
+    </button>
+    <div id="sellResult" style="margin-top: 1rem;"></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-trophy"></i> Your Badges
+    </div>
+    <div id="badgesContainer">
+        <p style="color: #666;">Complete transactions to earn badges!</p>
+    </div>
+</div>
+
+<div class="card" style="position: fixed; bottom: 20px; right: 20px; width: 350px; max-height: 500px; z-index: 999; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+    <div class="card-header" style="cursor: pointer;" onclick="toggleChat()">
+        <i class="fas fa-robot"></i> AI Assistant
+        <span style="float: right;"><i class="fas fa-chevron-down" id="chatToggle"></i></span>
+    </div>
+    <div id="chatBox" style="display: block;">
+        <div id="chatMessages" style="height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f9f9f9;">
+            <div class="alert alert-info">
+                <strong>AI Assistant:</strong> Hello! I'm here to help with oilseed farming, pricing, weather, and more. Ask me anything!
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="chatInput" class="form-control" placeholder="Ask about prices, weather, pests..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <a href="/download-report?type=farmer" class="btn btn-secondary">
+        <i class="fas fa-download"></i> Download My Report (PDF)
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+let currentPredictions = [];
+
+function toggleChat() {
+    const chatBox = document.getElementById('chatBox');
+    const toggle = document.getElementById('chatToggle');
+    if (chatBox.style.display === 'none') {
+        chatBox.style.display = 'block';
+        toggle.className = 'fas fa-chevron-down';
+    } else {
+        chatBox.style.display = 'none';
+        toggle.className = 'fas fa-chevron-up';
+    }
+}
+
+async function predictPrice() {
+    const cropType = document.getElementById('cropType').value;
+    
+    try {
+        const response = await fetch('/api/predict-price', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({crop_type: cropType})
+        });
+        
+        const data = await response.json();
+        currentPredictions = data.predictions;
+        
+        document.getElementById('priceChart').innerHTML = `
+            <img src="data:image/png;base64,${data.chart}" style="width: 100%; border-radius: 8px;">
+        `;
+        
+        let priceTable = '<h4 style="margin-top: 1rem;">7-Day Price Forecast</h4><table style="width: 100%; border-collapse: collapse;">';
+        priceTable += '<tr style="background: #2ecc71; color: white;"><th style="padding: 0.5rem;">Date</th><th style="padding: 0.5rem;">Price (₹/quintal)</th></tr>';
+        data.predictions.forEach((pred, idx) => {
+            const bg = idx % 2 === 0 ? '#f9f9f9' : 'white';
+            priceTable += `<tr style="background: ${bg};"><td style="padding: 0.5rem; border: 1px solid #ddd;">${pred.date}</td><td style="padding: 0.5rem; border: 1px solid #ddd;">₹${pred.price.toFixed(2)}</td></tr>`;
+        });
+        priceTable += '</table>';
+        document.getElementById('priceData').innerHTML = priceTable;
+        
+        const advisory = data.advisory;
+        document.getElementById('advisoryContent').innerHTML = `
+            <div class="alert alert-success">
+                <strong><i class="fas fa-cloud-sun"></i> Weather:</strong> ${advisory.weather}
+            </div>
+            <div class="alert alert-warning">
+                <strong><i class="fas fa-bug"></i> Pest Risk:</strong> ${advisory.pest_risk}
+            </div>
+            <div class="alert alert-info">
+                <strong><i class="fas fa-seedling"></i> Sowing Time:</strong> ${advisory.sowing_time}
+            </div>
+            <div class="alert alert-info">
+                <strong><i class="fas fa-tractor"></i> Harvest Time:</strong> ${advisory.harvest_time}
+            </div>
+            <div class="alert alert-success">
+                <strong><i class="fas fa-lightbulb"></i> Tip:</strong> ${advisory.tips}
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to fetch predictions. Please try again.');
+    }
+}
+
+async function sellCrop() {
+    const farmerName = document.getElementById('farmerName').value;
+    const cropType = document.getElementById('sellCropType').value;
+    const quantity = parseFloat(document.getElementById('quantity').value);
+    const price = parseFloat(document.getElementById('price').value);
+    
+    if (!farmerName || !quantity || !price) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/sell-crop', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                farmer_name: farmerName,
+                crop_type: cropType,
+                quantity: quantity,
+                price: price
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('sellResult').innerHTML = `
+                <div class="alert alert-success">
+                    <strong><i class="fas fa-check-circle"></i> Success!</strong> 
+                    ${data.message}<br>
+                    <strong>Block Hash:</strong> ${data.block_hash.substring(0, 16)}...
+                </div>
+            `;
+            
+            if (data.badges && data.badges.length > 0) {
+                let badgesHTML = '<h4>Congratulations! Your badges:</h4><div>';
+                data.badges.forEach(badge => {
+                    badgesHTML += `<span class="badge badge-success">${badge}</span>`;
+                });
+                badgesHTML += '</div>';
+                document.getElementById('badgesContainer').innerHTML = badgesHTML;
+            }
+            
+            document.getElementById('farmerName').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('price').value = '';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to record transaction. Please try again.');
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    const messagesDiv = document.getElementById('chatMessages');
+    messagesDiv.innerHTML += `
+        <div style="margin-bottom: 1rem; text-align: right;">
+            <strong>You:</strong> ${message}
+        </div>
+    `;
+    
+    input.value = '';
+    
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        });
+        
+        const data = await response.json();
+        
+        messagesDiv.innerHTML += `
+            <div class="alert alert-info" style="margin-bottom: 1rem;">
+                <strong>AI Assistant:</strong> ${data.response}
+            </div>
+        `;
+        
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+window.onload = function() {
+    predictPrice();
+};
+{% endblock %}
