@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Oilseed Platform{% endblock %}
+
+{% block content %}
+<h1 style="color: #2ecc71; margin-bottom: 2rem;">
+    <i class="fas fa-chart-line"></i> Policymaker/Admin Dashboard
+</h1>
+
+<div class="alert alert-info" style="margin-bottom: 2rem;">
+    <strong><i class="fas fa-plug"></i> System Integration:</strong> Connected to AgriStack API (Simulated) | 
+    <strong><i class="fas fa-database"></i> Blockchain Status:</strong> Active & Verified ✓
+</div>
+
+<div class="grid grid-3">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="stat-value">{{ stats.total_transactions }}</div>
+        <div class="stat-label"><i class="fas fa-exchange-alt"></i> National Transactions</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="stat-value">{{ "%.0f"|format(stats.total_volume / 1000) }}</div>
+        <div class="stat-label"><i class="fas fa-balance-scale"></i> Total Volume (tonnes)</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        <div class="stat-value">₹{{ "%.0f"|format(stats.total_value / 100000) }}L</div>
+        <div class="stat-label"><i class="fas fa-coins"></i> Platform Value</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-brain"></i> AI-Generated Insights
+    </div>
+    <div class="grid grid-2">
+        {% for insight in insights %}
+        <div class="alert alert-{{ insight.type }}">
+            <strong>
+                {% if insight.type == 'success' %}
+                    <i class="fas fa-check-circle"></i>
+                {% elif insight.type == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                {% else %}
+                    <i class="fas fa-info-circle"></i>
+                {% endif %}
+            </strong>
+            {{ insight.message }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-area"></i> Price Trend Analysis
+        </div>
+        <canvas id="priceTrendChart"></canvas>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-line"></i> Volume Traded (Daily)
+        </div>
+        <canvas id="volumeChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-map-marked-alt"></i> Logistics & Warehouse Map (Simulated)
+    </div>
+    <div style="background: #f0f0f0; padding: 2rem; border-radius: 8px; text-align: center;">
+        <div class="grid grid-3">
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h4 style="color: #2ecc71; margin-bottom: 0.5rem;">
+                    <i class="fas fa-map-marker-alt"></i> North Zone
+                </h4>
+                <p><strong>Warehouses:</strong> 12</p>
+                <p><strong>Capacity:</strong> 25,000 tonnes</p>
+                <p><strong>Utilization:</strong> 68%</p>
+            </div>
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h4 style="color: #3498db; margin-bottom: 0.5rem;">
+                    <i class="fas fa-map-marker-alt"></i> Central Zone
+                </h4>
+                <p><strong>Warehouses:</strong> 18</p>
+                <p><strong>Capacity:</strong> 40,000 tonnes</p>
+                <p><strong>Utilization:</strong> 75%</p>
+            </div>
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h4 style="color: #e74c3c; margin-bottom: 0.5rem;">
+                    <i class="fas fa-map-marker-alt"></i> South Zone
+                </h4>
+                <p><strong>Warehouses:</strong> 15</p>
+                <p><strong>Capacity:</strong> 32,000 tonnes</p>
+                <p><strong>Utilization:</strong> 82%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-clipboard-list"></i> Policy Recommendations
+    </div>
+    <div class="grid grid-2">
+        <div>
+            <h4 style="color: #2ecc71;"><i class="fas fa-bullhorn"></i> Short-term Actions</h4>
+            <ul style="line-height: 2;">
+                <li>Increase MSP for groundnut by 3-5% to boost production</li>
+                <li>Launch awareness campaign for FPO network expansion</li>
+                <li>Subsidize solar dryers for better post-harvest quality</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #3498db;"><i class="fas fa-chess"></i> Long-term Strategy</h4>
+            <ul style="line-height: 2;">
+                <li>Invest in oilseed processing infrastructure in deficit regions</li>
+                <li>Develop high-yield variety seeds through research programs</li>
+                <li>Strengthen export competitiveness for surplus production</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-table"></i> Recent Blockchain Transactions
+    </div>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 0.75rem;">Block #</th>
+                    <th style="padding: 0.75rem;">Farmer</th>
+                    <th style="padding: 0.75rem;">Crop</th>
+                    <th style="padding: 0.75rem;">Quantity</th>
+                    <th style="padding: 0.75rem;">Value</th>
+                    <th style="padding: 0.75rem;">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for trans in transactions[-10:] %}
+                    <tr style="background: {% if loop.index % 2 == 0 %}#f9f9f9{% else %}white{% endif %};">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.index }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.farmer_name }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.crop_type }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ "%.0f"|format(trans.quantity) }} kg</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">₹{{ "%.0f"|format(trans.quantity * trans.price / 100) }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.timestamp.split()[0] }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="padding: 2rem; text-align: center; color: #666;">
+                            No transactions recorded yet
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <a href="/download-report?type=transactions" class="btn btn-secondary">
+        <i class="fas fa-download"></i> Download National Report (PDF)
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+const priceTrendCtx = document.getElementById('priceTrendChart').getContext('2d');
+const priceTrendChart = new Chart(priceTrendCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Soybean',
+                data: [4300, 4400, 4500, 4600, 4550, 4650, 4700],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Mustard',
+                data: [5800, 5900, 6000, 6100, 6050, 6150, 6200],
+                borderColor: '#f39c12',
+                backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Groundnut',
+                data: [5000, 5100, 5200, 5300, 5250, 5350, 5400],
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                title: {
+                    display: true,
+                    text: 'Price (₹/quintal)'
+                }
+            }
+        }
+    }
+});
+
+const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+const volumeChart = new Chart(volumeCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: 'Volume Traded (tonnes)',
+            data: [120, 150, 180, 140, 200, 170, 160],
+            backgroundColor: 'rgba(46, 204, 113, 0.7)',
+            borderColor: '#2ecc71',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Volume (tonnes)'
+                }
+            }
+        }
+    }
+});
+{% endblock %}

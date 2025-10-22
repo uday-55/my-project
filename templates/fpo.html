@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}FPO Dashboard - Oilseed Platform{% endblock %}
+
+{% block content %}
+<h1 style="color: #2ecc71; margin-bottom: 2rem;">
+    <i class="fas fa-warehouse"></i> FPO/Processor Dashboard
+</h1>
+
+<div class="grid grid-3">
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="stat-value">{{ stats.total_transactions }}</div>
+        <div class="stat-label"><i class="fas fa-receipt"></i> Total Transactions</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="stat-value">{{ "%.2f"|format(stats.total_volume) }}</div>
+        <div class="stat-label"><i class="fas fa-weight"></i> Total Volume (kg)</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+        <div class="stat-value">₹{{ "%.0f"|format(stats.total_value) }}</div>
+        <div class="stat-label"><i class="fas fa-rupee-sign"></i> Total Value</div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-pie"></i> Warehouse Capacity
+        </div>
+        <canvas id="warehouseChart"></canvas>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-bar"></i> Crops Procured by Type
+        </div>
+        <canvas id="cropsChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-link"></i> Blockchain Transaction Log
+        <span class="badge badge-success" style="float: right;">Chain Valid ✓</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #2ecc71; color: white;">
+                    <th style="padding: 0.75rem; text-align: left;">Block #</th>
+                    <th style="padding: 0.75rem; text-align: left;">Farmer</th>
+                    <th style="padding: 0.75rem; text-align: left;">Crop</th>
+                    <th style="padding: 0.75rem; text-align: left;">Quantity (kg)</th>
+                    <th style="padding: 0.75rem; text-align: left;">Price (₹)</th>
+                    <th style="padding: 0.75rem; text-align: left;">Date</th>
+                    <th style="padding: 0.75rem; text-align: left;">Hash</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for trans in transactions %}
+                    <tr style="background: {% if loop.index % 2 == 0 %}#f9f9f9{% else %}white{% endif %};">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.index }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.farmer_name }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.crop_type }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ "%.2f"|format(trans.quantity) }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">₹{{ "%.2f"|format(trans.price) }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">{{ trans.timestamp.split()[0] }}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd; font-family: monospace; font-size: 0.8rem;">
+                            {{ trans.hash[:16] }}...
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="padding: 2rem; text-align: center; color: #666;">
+                            No transactions recorded yet
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-handshake"></i> Procurement Management
+    </div>
+    <div class="alert alert-info">
+        <strong>Forward Contracts Available:</strong> Connect with farmers for advance procurement agreements at competitive prices.
+    </div>
+    <div class="grid grid-2">
+        <div>
+            <h4 style="color: #2ecc71;"><i class="fas fa-check-circle"></i> Active Contracts</h4>
+            <p>Contract ID: #FPO2025-001 - Soybean 500kg @ ₹4600/quintal</p>
+            <p>Contract ID: #FPO2025-002 - Mustard 750kg @ ₹6100/quintal</p>
+        </div>
+        <div>
+            <h4 style="color: #2ecc71;"><i class="fas fa-clock"></i> Pending Approvals</h4>
+            <p>Contract ID: #FPO2025-003 - Groundnut 400kg @ ₹5300/quintal</p>
+            <p>Contract ID: #FPO2025-004 - Sunflower 600kg @ ₹5900/quintal</p>
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom: 2rem;">
+    <a href="/download-report?type=transactions" class="btn btn-secondary">
+        <i class="fas fa-download"></i> Download Full Report (PDF)
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+const warehouseCtx = document.getElementById('warehouseChart').getContext('2d');
+const warehouseChart = new Chart(warehouseCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Used Capacity', 'Available Capacity'],
+        datasets: [{
+            data: [{{ warehouse.current_stock }}, {{ warehouse.capacity - warehouse.current_stock }}],
+            backgroundColor: ['#e74c3c', '#2ecc71'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: 'Warehouse: {{ "%.1f"|format((warehouse.current_stock / warehouse.capacity * 100)) }}% Full'
+            }
+        }
+    }
+});
+
+const cropsData = {{ stats.crops_summary | tojson }};
+const cropLabels = Object.keys(cropsData);
+const cropQuantities = cropLabels.map(crop => cropsData[crop].quantity);
+const cropColors = ['#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
+
+const cropsCtx = document.getElementById('cropsChart').getContext('2d');
+const cropsChart = new Chart(cropsCtx, {
+    type: 'bar',
+    data: {
+        labels: cropLabels.map(c => c.charAt(0).toUpperCase() + c.slice(1)),
+        datasets: [{
+            label: 'Quantity (kg)',
+            data: cropQuantities,
+            backgroundColor: cropColors.slice(0, cropLabels.length),
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+{% endblock %}
