@@ -1,0 +1,124 @@
+Build a complete web-based prototype for the AI-Enabled Value Chain Platform for Oilseed Self-Reliance (PS 25270) using Flask (Python) as the backend and HTML + CSS + JavaScript for the frontend.
+
+🌾 Overview
+
+India still imports 55–60% of its edible oil despite a major rise in oilseed production. The goal is to create a single integrated AI + Blockchain + Analytics platform connecting all key stakeholders — farmers, FPOs/processors, retailers, and policymakers — to optimize the oilseed value chain from seed to shelf.
+
+🏗️ Key Functional Modules
+👨‍🌾 Farmer Dashboard
+
+Crop selection (soybean, groundnut, mustard, sunflower)
+
+AI-powered price prediction using mock ML logic (simulate real forecasting)
+
+Crop advisory card showing:
+
+Weather alerts
+
+Pest risk warning
+
+Recommended sowing & harvest time
+
+Input: harvest quantity (kg or tonnes)
+
+Button: “Sell Crop” → adds a Blockchain transaction entry
+
+Credit & insurance recommendation module (based on performance or data)
+
+🏭 FPO/Processor Dashboard
+
+View blockchain transaction list (farmer sales)
+
+Manage procurement & inventory
+
+Display simple Chart.js visualizations:
+
+Crops purchased by type
+
+Warehouse capacity utilization
+
+Option to generate or simulate “forward contract” with farmers
+
+🧑‍💼 Policymaker/Admin Dashboard
+
+View national summary analytics:
+
+Total transactions
+
+Total oilseed volume handled
+
+Price trends & predicted future price (mock chart)
+
+Interactive AI insights panel (AI-generated suggestions)
+
+Logistics & warehouse map visualization (simulated)
+
+Integration placeholder: “Connected to AgriStack API”
+
+🧠 AI Module (Simulated)
+
+Function that uses mock logic or random generation to predict oilseed prices for the next 7 days.
+
+Use matplotlib or Chart.js for visualizing the predicted trend line.
+
+Display “AI Insight Cards” summarizing key analytics like:
+
+“Mustard oil price expected to rise by 5% next week”
+
+“Soybean output expected to drop due to monsoon delay”
+
+🔗 Blockchain Simulation
+
+Create a simple blockchain model in Python:
+
+Each block = farmer name, crop, price, quantity, timestamp, and hash.
+
+Store blocks in a local Python list (blockchain = []).
+
+Display all transactions on the FPO & Admin dashboards.
+
+Add function to verify the chain’s integrity.
+
+📊 Data Visualization
+
+Use Chart.js or Plotly.js for:
+
+Crop price trend chart (AI prediction)
+
+Warehouse utilization pie chart
+
+Volume traded line graph
+
+Add simple mock datasets to demonstrate analytics.
+
+🎨 Frontend / UI Design
+
+Use a nature-themed modern UI (green, white, light brown palette).
+
+Responsive layout (works on mobile & desktop).
+
+Include:
+
+Navigation bar for roles (Home | Farmer | FPO | Admin)
+
+Dashboard cards with shadow & rounded corners
+
+Beautiful gradients and icons for visual appeal
+
+Optional: Add a small animation when AI results or blockchain updates are shown.
+
+⚙️ Backend Structure (Flask)
+
+Flask routes:
+
+/ → Homepage with role selection
+
+/farmer → Farmer dashboard
+
+/fpo → FPO dashboard
+
+/admin → Policymaker dashboard
+
+Store data in dictionaries or JSON (no database needed)
+
+Separate logic into functions: predict_price(), add_block(), get_summary()
