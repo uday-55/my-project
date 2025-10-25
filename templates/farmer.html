@@ -2,53 +2,151 @@
 
 {% block title %}Farmer Dashboard - Oilseed Platform{% endblock %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .language-selector {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1000;
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .voice-controls {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .voice-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .voice-btn.listening {
+        background: #e74c3c;
+        color: white;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    #map {
+        height: 500px;
+        border-radius: 12px;
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .map-search {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .map-legend {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .legend-marker {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="language-selector">
+    <label style="margin-right: 0.5rem; font-weight: 600;">
+        <i class="fas fa-language"></i> Language:
+    </label>
+    <select id="languageSelect" onchange="changeLanguage()" class="form-control" style="display: inline-block; width: auto;">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+        <option value="ta">தமிழ் (Tamil)</option>
+    </select>
+</div>
+
 <h1 style="color: #2ecc71; margin-bottom: 2rem;">
-    <i class="fas fa-tractor"></i> Farmer Dashboard
+    <i class="fas fa-tractor"></i> <span data-translate="farmer_dashboard">Farmer Dashboard</span>
 </h1>
 
 <div class="grid grid-2">
     <div class="card">
         <div class="card-header">
-            <i class="fas fa-chart-line"></i> AI Price Predictor
+            <i class="fas fa-chart-line"></i> <span data-translate="ai_price_predictor">AI Price Predictor</span>
+            <button onclick="toggleVoice()" class="voice-btn" id="voiceBtn" style="float: right; font-size: 0.9rem;">
+                <i class="fas fa-microphone"></i> <span data-translate="voice_control">Voice Control</span>
+            </button>
         </div>
         <div class="form-group">
-            <label class="form-label">Select Crop Type</label>
+            <label class="form-label" data-translate="select_crop">Select Crop Type</label>
             <select id="cropType" class="form-control">
-                <option value="soybean">Soybean</option>
-                <option value="groundnut">Groundnut</option>
-                <option value="mustard">Mustard</option>
-                <option value="sunflower">Sunflower</option>
+                <option value="soybean" data-translate="soybean">Soybean</option>
+                <option value="groundnut" data-translate="groundnut">Groundnut</option>
+                <option value="mustard" data-translate="mustard">Mustard</option>
+                <option value="sunflower" data-translate="sunflower">Sunflower</option>
             </select>
         </div>
         <button onclick="predictPrice()" class="btn btn-primary">
-            <i class="fas fa-brain"></i> Predict Prices
+            <i class="fas fa-brain"></i> <span data-translate="predict_prices">Predict Prices</span>
         </button>
+        <div class="voice-controls">
+            <div id="voiceStatus" style="color: #666; font-size: 0.9rem;"></div>
+        </div>
         <div id="priceChart" style="margin-top: 2rem;"></div>
         <div id="priceData" style="margin-top: 1rem;"></div>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <i class="fas fa-cloud-sun"></i> Crop Advisory
+            <i class="fas fa-cloud-sun"></i> <span data-translate="crop_advisory">Crop Advisory</span>
         </div>
         <div id="advisoryContent">
-            <p style="color: #666;">Select a crop and click "Predict Prices" to see advisory information</p>
+            <p style="color: #666;" data-translate="select_crop_info">Select a crop and click "Predict Prices" to see advisory information</p>
         </div>
     </div>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-dollar-sign"></i> Sell Your Crop
+        <i class="fas fa-dollar-sign"></i> <span data-translate="sell_crop">Sell Your Crop</span>
     </div>
     <div class="grid grid-2">
         <div class="form-group">
-            <label class="form-label">Your Name</label>
+            <label class="form-label" data-translate="your_name">Your Name</label>
             <input type="text" id="farmerName" class="form-control" placeholder="Enter your name">
         </div>
         <div class="form-group">
-            <label class="form-label">Crop Type</label>
+            <label class="form-label" data-translate="crop_type">Crop Type</label>
             <select id="sellCropType" class="form-control">
                 <option value="soybean">Soybean</option>
                 <option value="groundnut">Groundnut</option>
@@ -57,38 +155,62 @@
             </select>
         </div>
         <div class="form-group">
-            <label class="form-label">Quantity (kg)</label>
+            <label class="form-label" data-translate="quantity">Quantity (kg)</label>
             <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" min="0">
         </div>
         <div class="form-group">
-            <label class="form-label">Price (₹/quintal)</label>
+            <label class="form-label" data-translate="price">Price (₹/quintal)</label>
             <input type="number" id="price" class="form-control" placeholder="Enter price" min="0">
         </div>
     </div>
     <button onclick="sellCrop()" class="btn btn-primary">
-        <i class="fas fa-shopping-cart"></i> Sell Crop
+        <i class="fas fa-shopping-cart"></i> <span data-translate="sell_crop_btn">Sell Crop</span>
     </button>
     <div id="sellResult" style="margin-top: 1rem;"></div>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-trophy"></i> Your Badges
+        <i class="fas fa-trophy"></i> <span data-translate="your_badges">Your Badges</span>
     </div>
     <div id="badgesContainer">
-        <p style="color: #666;">Complete transactions to earn badges!</p>
+        <p style="color: #666;" data-translate="earn_badges">Complete transactions to earn badges!</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-map-marked-alt"></i> <span data-translate="marketplace_map">Marketplace Map - Find Farmers, Buyers & Warehouses</span>
+    </div>
+    <div class="map-search">
+        <input type="text" id="mapSearch" class="form-control" placeholder="Search for farms, buyers, or warehouses..." onkeyup="searchMap()">
+    </div>
+    <div id="map"></div>
+    <div class="map-legend">
+        <div class="legend-item">
+            <div class="legend-marker" style="background: #2ecc71;"></div>
+            <span data-translate="farmers">🟢 Farmers</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker" style="background: #3498db;"></div>
+            <span data-translate="buyers">🔵 Buyers</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker" style="background: #e67e22;"></div>
+            <span data-translate="warehouses">🟠 Marketplaces/Warehouses</span>
+        </div>
     </div>
 </div>
 
 <div class="card" style="position: fixed; bottom: 20px; right: 20px; width: 350px; max-height: 500px; z-index: 999; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
     <div class="card-header" style="cursor: pointer;" onclick="toggleChat()">
-        <i class="fas fa-robot"></i> AI Assistant
+        <i class="fas fa-robot"></i> <span data-translate="ai_assistant">AI Assistant</span>
         <span style="float: right;"><i class="fas fa-chevron-down" id="chatToggle"></i></span>
     </div>
     <div id="chatBox" style="display: block;">
         <div id="chatMessages" style="height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f9f9f9;">
             <div class="alert alert-info">
-                <strong>AI Assistant:</strong> Hello! I'm here to help with oilseed farming, pricing, weather, and more. Ask me anything!
+                <strong data-translate="ai_assistant">AI Assistant:</strong> <span data-translate="ai_greeting">Hello! I'm here to help with oilseed farming, pricing, weather, and more. Ask me anything!</span>
             </div>
         </div>
         <div style="display: flex; gap: 0.5rem;">
@@ -96,19 +218,275 @@
             <button onclick="sendMessage()" class="btn btn-primary">
                 <i class="fas fa-paper-plane"></i>
             </button>
+            <button onclick="voiceChat()" class="btn btn-secondary">
+                <i class="fas fa-microphone"></i>
+            </button>
         </div>
     </div>
 </div>
 
 <div style="margin-bottom: 2rem;">
     <a href="/download-report?type=farmer" class="btn btn-secondary">
-        <i class="fas fa-download"></i> Download My Report (PDF)
+        <i class="fas fa-download"></i> <span data-translate="download_report">Download My Report (PDF)</span>
     </a>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
 let currentPredictions = [];
+let map;
+let markers = [];
+let currentLanguage = 'en';
+let recognition;
+let isListening = false;
+
+const translations = {
+    en: {
+        farmer_dashboard: "Farmer Dashboard",
+        ai_price_predictor: "AI Price Predictor",
+        voice_control: "Voice Control",
+        select_crop: "Select Crop Type",
+        predict_prices: "Predict Prices",
+        crop_advisory: "Crop Advisory",
+        select_crop_info: "Select a crop and click 'Predict Prices' to see advisory information",
+        sell_crop: "Sell Your Crop",
+        your_name: "Your Name",
+        crop_type: "Crop Type",
+        quantity: "Quantity (kg)",
+        price: "Price (₹/quintal)",
+        sell_crop_btn: "Sell Crop",
+        your_badges: "Your Badges",
+        earn_badges: "Complete transactions to earn badges!",
+        marketplace_map: "Marketplace Map - Find Farmers, Buyers & Warehouses",
+        farmers: "🟢 Farmers",
+        buyers: "🔵 Buyers",
+        warehouses: "🟠 Marketplaces/Warehouses",
+        ai_assistant: "AI Assistant",
+        ai_greeting: "Hello! I'm here to help with oilseed farming, pricing, weather, and more. Ask me anything!",
+        download_report: "Download My Report (PDF)",
+        soybean: "Soybean",
+        groundnut: "Groundnut",
+        mustard: "Mustard",
+        sunflower: "Sunflower"
+    },
+    hi: {
+        farmer_dashboard: "किसान डैशबोर्ड",
+        ai_price_predictor: "एआई मूल्य भविष्यवक्ता",
+        voice_control: "आवाज नियंत्रण",
+        select_crop: "फसल चुनें",
+        predict_prices: "कीमतों की भविष्यवाणी करें",
+        crop_advisory: "फसल सलाह",
+        select_crop_info: "फसल चुनें और सलाह जानकारी देखने के लिए 'कीमतों की भविष्यवाणी करें' पर क्लिक करें",
+        sell_crop: "अपनी फसल बेचें",
+        your_name: "आपका नाम",
+        crop_type: "फसल का प्रकार",
+        quantity: "मात्रा (किलो)",
+        price: "मूल्य (₹/क्विंटल)",
+        sell_crop_btn: "फसल बेचें",
+        your_badges: "आपके बैज",
+        earn_badges: "बैज अर्जित करने के लिए लेनदेन पूरा करें!",
+        marketplace_map: "बाजार मानचित्र - किसान, खरीदार और गोदाम खोजें",
+        farmers: "🟢 किसान",
+        buyers: "🔵 खरीदार",
+        warehouses: "🟠 बाजार/गोदाम",
+        ai_assistant: "एआई सहायक",
+        ai_greeting: "नमस्ते! मैं तिलहन की खेती, मूल्य निर्धारण, मौसम और अधिक में मदद के लिए यहाँ हूँ। मुझसे कुछ भी पूछें!",
+        download_report: "मेरी रिपोर्ट डाउनलोड करें (PDF)",
+        soybean: "सोयाबीन",
+        groundnut: "मूंगफली",
+        mustard: "सरसों",
+        sunflower: "सूरजमुखी"
+    },
+    te: {
+        farmer_dashboard: "రైతు డాష్‌బోర్డ్",
+        ai_price_predictor: "AI ధర అంచనా",
+        voice_control: "వాయిస్ నియంత్రణ",
+        select_crop: "పంట ఎంచుకోండి",
+        predict_prices: "ధరలను అంచనా వేయండి",
+        crop_advisory: "పంట సలహా",
+        ai_assistant: "AI సహాయకుడు",
+        download_report: "నా నివేదికను డౌన్‌లోడ్ చేయండి (PDF)"
+    },
+    ta: {
+        farmer_dashboard: "விவசாயி டாஷ்போர்டு",
+        ai_price_predictor: "AI விலை முன்னறிவிப்பு",
+        voice_control: "குரல் கட்டுப்பாடு",
+        select_crop: "பயிரைத் தேர்ந்தெடுக்கவும்",
+        predict_prices: "விலைகளை முன்னறிவிக்கவும்",
+        crop_advisory: "பயிர் ஆலோசனை",
+        ai_assistant: "AI உதவியாளர்",
+        download_report: "எனது அறிக்கையைப் பதிவிறக்கவும் (PDF)"
+    }
+};
+
+function changeLanguage() {
+    currentLanguage = document.getElementById('languageSelect').value;
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[currentLanguage] && translations[currentLanguage][key]) {
+            element.textContent = translations[currentLanguage][key];
+        }
+    });
+}
+
+function initVoice() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+        
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            document.getElementById('voiceStatus').textContent = `Heard: "${transcript}"`;
+            processVoiceCommand(transcript);
+        };
+        
+        recognition.onerror = function(event) {
+            document.getElementById('voiceStatus').textContent = 'Error: ' + event.error;
+            isListening = false;
+            document.getElementById('voiceBtn').classList.remove('listening');
+        };
+        
+        recognition.onend = function() {
+            isListening = false;
+            document.getElementById('voiceBtn').classList.remove('listening');
+        };
+    } else {
+        document.getElementById('voiceStatus').textContent = 'Voice recognition not supported';
+    }
+}
+
+function toggleVoice() {
+    if (!recognition) {
+        initVoice();
+    }
+    
+    if (isListening) {
+        recognition.stop();
+        isListening = false;
+        document.getElementById('voiceBtn').classList.remove('listening');
+        document.getElementById('voiceStatus').textContent = '';
+    } else {
+        recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+        recognition.start();
+        isListening = true;
+        document.getElementById('voiceBtn').classList.add('listening');
+        document.getElementById('voiceStatus').textContent = 'Listening...';
+    }
+}
+
+function processVoiceCommand(command) {
+    if (command.includes('soybean') || command.includes('सोयाबीन')) {
+        document.getElementById('cropType').value = 'soybean';
+        predictPrice();
+    } else if (command.includes('groundnut') || command.includes('मूंगफली')) {
+        document.getElementById('cropType').value = 'groundnut';
+        predictPrice();
+    } else if (command.includes('mustard') || command.includes('सरसों')) {
+        document.getElementById('cropType').value = 'mustard';
+        predictPrice();
+    } else if (command.includes('sunflower') || command.includes('सूरजमुखी')) {
+        document.getElementById('cropType').value = 'sunflower';
+        predictPrice();
+    } else if (command.includes('price') || command.includes('predict') || command.includes('कीमत')) {
+        predictPrice();
+    } else {
+        speak('Command not recognized. Try saying: soybean price, mustard price, or groundnut price');
+    }
+}
+
+function voiceChat() {
+    if (!recognition) initVoice();
+    
+    const voiceRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    voiceRecognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+    voiceRecognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chatInput').value = transcript;
+        sendMessage();
+    };
+    voiceRecognition.start();
+}
+
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function initMap() {
+    map = L.map('map').setView([20.5937, 78.9629], 5);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    const locations = [
+        {type: 'farmer', name: 'Ram Kumar Farm', lat: 28.6139, lng: 77.2090, crop: 'Soybean, Mustard', icon: '🟢'},
+        {type: 'farmer', name: 'Lakshmi Agro', lat: 19.0760, lng: 72.8777, crop: 'Groundnut', icon: '🟢'},
+        {type: 'farmer', name: 'Suresh Organic Farm', lat: 13.0827, lng: 80.2707, crop: 'Sunflower', icon: '🟢'},
+        {type: 'farmer', name: 'Ganesh Farms', lat: 17.3850, lng: 78.4867, crop: 'Soybean', icon: '🟢'},
+        {type: 'farmer', name: 'Rajesh Crops', lat: 22.5726, lng: 88.3639, crop: 'Mustard', icon: '🟢'},
+        {type: 'buyer', name: 'ABC Oil Mills', lat: 28.4595, lng: 77.0266, demand: 'All Oilseeds', icon: '🔵'},
+        {type: 'buyer', name: 'Premium Processors', lat: 12.9716, lng: 77.5946, demand: 'Groundnut, Sunflower', icon: '🔵'},
+        {type: 'buyer', name: 'Golden Oil Industries', lat: 23.0225, lng: 72.5714, demand: 'Soybean', icon: '🔵'},
+        {type: 'warehouse', name: 'Central Warehouse Delhi', lat: 28.7041, lng: 77.1025, capacity: '5000 tonnes', icon: '🟠'},
+        {type: 'warehouse', name: 'Maharashtra Storage Hub', lat: 19.2183, lng: 72.9781, capacity: '8000 tonnes', icon: '🟠'},
+        {type: 'warehouse', name: 'South India Depot', lat: 13.0569, lng: 80.2425, capacity: '6000 tonnes', icon: '🟠'},
+        {type: 'warehouse', name: 'Telangana FPO Center', lat: 17.4474, lng: 78.3742, capacity: '4500 tonnes', icon: '🟠'}
+    ];
+    
+    locations.forEach((loc, index) => {
+        setTimeout(() => {
+            let color = loc.type === 'farmer' ? '#2ecc71' : loc.type === 'buyer' ? '#3498db' : '#e67e22';
+            
+            const icon = L.divIcon({
+                html: `<div style="background: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+                className: '',
+                iconSize: [24, 24]
+            });
+            
+            let popupContent = `<strong>${loc.name}</strong><br>`;
+            if (loc.type === 'farmer') popupContent += `<em>Crops:</em> ${loc.crop}`;
+            else if (loc.type === 'buyer') popupContent += `<em>Demand:</em> ${loc.demand}`;
+            else if (loc.type === 'warehouse') popupContent += `<em>Capacity:</em> ${loc.capacity}`;
+            
+            const marker = L.marker([loc.lat, loc.lng], {icon: icon})
+                .addTo(map)
+                .bindPopup(popupContent);
+            
+            markers.push({marker: marker, data: loc});
+        }, index * 100);
+    });
+}
+
+function searchMap() {
+    const searchTerm = document.getElementById('mapSearch').value.toLowerCase();
+    
+    markers.forEach(({marker, data}) => {
+        const matchesSearch = !searchTerm || 
+            data.name.toLowerCase().includes(searchTerm) ||
+            (data.crop && data.crop.toLowerCase().includes(searchTerm)) ||
+            (data.demand && data.demand.toLowerCase().includes(searchTerm));
+        
+        if (matchesSearch) {
+            marker.setOpacity(1);
+            if (searchTerm && matchesSearch) {
+                marker.openPopup();
+                map.setView(marker.getLatLng(), 8);
+            }
+        } else {
+            marker.setOpacity(0.3);
+        }
+    });
+}
 
 function toggleChat() {
     const chatBox = document.getElementById('chatBox');
@@ -166,6 +544,8 @@ async function predictPrice() {
                 <strong><i class="fas fa-lightbulb"></i> Tip:</strong> ${advisory.tips}
             </div>
         `;
+        
+        speak(`The predicted price for ${cropType} is ${data.predictions[0].price} rupees per quintal`);
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to fetch predictions. Please try again.');
@@ -213,7 +593,10 @@ async function sellCrop() {
                 });
                 badgesHTML += '</div>';
                 document.getElementById('badgesContainer').innerHTML = badgesHTML;
+                speak('Congratulations! You earned new badges');
             }
+            
+            speak('Transaction successful. Your crop has been recorded on the blockchain');
             
             document.getElementById('farmerName').value = '';
             document.getElementById('quantity').value = '';
@@ -255,6 +638,7 @@ async function sendMessage() {
             </div>
         `;
         
+        speak(data.response);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     } catch (error) {
         console.error('Error:', error);
@@ -263,5 +647,8 @@ async function sendMessage() {
 
 window.onload = function() {
     predictPrice();
+    initMap();
+    initVoice();
 };
+</script>
 {% endblock %}

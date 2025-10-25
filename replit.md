@@ -12,7 +12,7 @@ Create a visually appealing, interactive, and informative prototype that demonst
 ## Key Features
 
 ### 1. Three Role-Based Dashboards
-- **Farmer Dashboard**: AI price prediction, crop advisory, selling interface, gamified badges, AI chatbot
+- **Farmer Dashboard**: AI price prediction, crop advisory, selling interface, gamified badges, AI chatbot, **multilingual support (English/Hindi/Telugu/Tamil)**, **voice assistant**, **interactive map with farmers/buyers/warehouses**
 - **FPO/Processor Dashboard**: Blockchain transaction log, warehouse management, Chart.js visualizations
 - **Policymaker/Admin Dashboard**: National analytics, AI insights, logistics visualization, policy recommendations
 
@@ -47,6 +47,31 @@ Create a visually appealing, interactive, and informative prototype that demonst
 - Transaction reports with blockchain statistics
 - Farmer performance reports with predictions and badges
 - Uses ReportLab for professional PDF output
+
+### 8. Multilingual Support
+- Language selector with support for English, Hindi, Telugu, and Tamil
+- Real-time interface translation
+- Voice recognition in English and Hindi
+- Inclusive design for farmers across India
+
+### 9. Voice Assistant Integration
+- Web Speech API for voice commands
+- Voice-activated crop price prediction
+- Text-to-speech feedback for transactions and predictions
+- Voice input for AI chatbot queries
+- Hands-free operation for farmers
+
+### 10. Interactive Geographic Map
+- Leaflet.js with OpenStreetMap integration
+- Visual markers for:
+  - 🟢 Farmers (green) - showing crop types
+  - 🔵 Buyers (blue) - showing demand
+  - 🟠 Marketplaces/Warehouses (orange) - showing capacity
+- Search functionality to find nearby farms, buyers, or warehouses
+- Popup information cards with location details
+- Smooth animations and zoom controls
+- Responsive design matching dashboard theme
+- Centered on India with pan and zoom capabilities
 
 ## Project Structure
 
