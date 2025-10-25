@@ -292,7 +292,9 @@ const translations = {
         tip: "Tip",
         success: "Success!",
         congratulations: "Congratulations! Your badges:",
-        fill_all_fields: "Please fill in all fields"
+        fill_all_fields: "Please fill in all fields",
+        price_per_quintal: "Price (₹/quintal)",
+        price_prediction_title: "Price Prediction - Next 7 Days"
     },
     hi: {
         farmer_dashboard: "किसान डैशबोर्ड",
@@ -335,7 +337,9 @@ const translations = {
         tip: "सुझाव",
         success: "सफलता!",
         congratulations: "बधाई हो! आपके बैज:",
-        fill_all_fields: "कृपया सभी फ़ील्ड भरें"
+        fill_all_fields: "कृपया सभी फ़ील्ड भरें",
+        price_per_quintal: "मूल्य (₹/क्विंटल)",
+        price_prediction_title: "मूल्य पूर्वानुमान - अगले 7 दिन"
     },
     te: {
         farmer_dashboard: "రైతు డాష్‌బోర్డ్",
@@ -358,7 +362,16 @@ const translations = {
         marketplace_map: "మార్కెట్ మ్యాప్ - రైతులు, కొనుగోలుదారులు & గిడ్డంగులు",
         farmers: "🟢 రైతులు",
         buyers: "🔵 కొనుగోలుదారులు",
-        warehouses: "🟠 మార్కెట్‌లు/గిడ్డంగులు"
+        warehouses: "🟠 మార్కెట్‌లు/గిడ్డంగులు",
+        weather: "వాతావరణం",
+        pest_risk: "తెగులు ప్రమాదం",
+        sowing_time: "విత్తే సమయం",
+        harvest_time: "కోత సమయం",
+        tip: "చిట్కా",
+        price_forecast: "7-రోజుల ధర అంచనా",
+        date: "తేదీ",
+        price_per_quintal: "ధర (₹/క్వింటాల్)",
+        price_prediction_title: "ధర అంచనా - తదుపరి 7 రోజులు"
     },
     ta: {
         farmer_dashboard: "விவசாயி டாஷ்போர்டு",
@@ -381,9 +394,24 @@ const translations = {
         marketplace_map: "சந்தை வரைபடம் - விவசாயிகள், வாங்குபவர்கள் & கிடங்குகள்",
         farmers: "🟢 விவசாயிகள்",
         buyers: "🔵 வாங்குபவர்கள்",
-        warehouses: "🟠 சந்தைகள்/கிடங்குகள்"
+        warehouses: "🟠 சந்தைகள்/கிடங்குகள்",
+        weather: "வானிலை",
+        pest_risk: "பூச்சி ஆபத்து",
+        sowing_time: "விதைக்கும் நேரம்",
+        harvest_time: "அறுவடை நேரம்",
+        tip: "உதவிக்குறிப்பு",
+        price_forecast: "7-நாள் விலை முன்னறிவிப்பு",
+        date: "தேதி",
+        price_per_quintal: "விலை (₹/குவிண்டால்)",
+        price_prediction_title: "விலை முன்னறிவிப்பு - அடுத்த 7 நாட்கள்"
     }
 };
+
+function getTranslation(key) {
+    return translations[currentLanguage] && translations[currentLanguage][key] 
+        ? translations[currentLanguage][key] 
+        : translations['en'][key] || key;
+}
 
 function changeLanguage() {
     currentLanguage = document.getElementById('languageSelect').value;
@@ -411,6 +439,14 @@ function changeLanguage() {
             option.textContent = translations[currentLanguage][key];
         }
     });
+    
+    // Re-render advisory and price data if they exist
+    if (currentPredictions && currentPredictions.length > 0) {
+        renderPriceData(currentPredictions);
+    }
+    if (window.currentAdvisory) {
+        renderAdvisory(window.currentAdvisory);
+    }
 }
 
 function initVoice() {
@@ -582,6 +618,37 @@ function toggleChat() {
     }
 }
 
+function renderPriceData(predictions) {
+    let priceTable = `<h4 style="margin-top: 1rem;">${getTranslation('price_forecast')}</h4><table style="width: 100%; border-collapse: collapse;">`;
+    priceTable += `<tr style="background: #2ecc71; color: white;"><th style="padding: 0.5rem;">${getTranslation('date')}</th><th style="padding: 0.5rem;">${getTranslation('price_per_quintal')}</th></tr>`;
+    predictions.forEach((pred, idx) => {
+        const bg = idx % 2 === 0 ? '#f9f9f9' : 'white';
+        priceTable += `<tr style="background: ${bg};"><td style="padding: 0.5rem; border: 1px solid #ddd;">${pred.date}</td><td style="padding: 0.5rem; border: 1px solid #ddd;">₹${pred.price.toFixed(2)}</td></tr>`;
+    });
+    priceTable += '</table>';
+    document.getElementById('priceData').innerHTML = priceTable;
+}
+
+function renderAdvisory(advisory) {
+    document.getElementById('advisoryContent').innerHTML = `
+        <div class="alert alert-success">
+            <strong><i class="fas fa-cloud-sun"></i> ${getTranslation('weather')}:</strong> ${advisory.weather}
+        </div>
+        <div class="alert alert-warning">
+            <strong><i class="fas fa-bug"></i> ${getTranslation('pest_risk')}:</strong> ${advisory.pest_risk}
+        </div>
+        <div class="alert alert-info">
+            <strong><i class="fas fa-seedling"></i> ${getTranslation('sowing_time')}:</strong> ${advisory.sowing_time}
+        </div>
+        <div class="alert alert-info">
+            <strong><i class="fas fa-tractor"></i> ${getTranslation('harvest_time')}:</strong> ${advisory.harvest_time}
+        </div>
+        <div class="alert alert-success">
+            <strong><i class="fas fa-lightbulb"></i> ${getTranslation('tip')}:</strong> ${advisory.tips}
+        </div>
+    `;
+}
+
 async function predictPrice() {
     const cropType = document.getElementById('cropType').value;
     
@@ -594,38 +661,14 @@ async function predictPrice() {
         
         const data = await response.json();
         currentPredictions = data.predictions;
+        window.currentAdvisory = data.advisory;
         
         document.getElementById('priceChart').innerHTML = `
-            <img src="data:image/png;base64,${data.chart}" style="width: 100%; border-radius: 8px;">
+            <img src="data:image/png;base64,${data.chart}" style="width: 100%; border-radius: 8px;" alt="${getTranslation('price_prediction_title')}">
         `;
         
-        let priceTable = '<h4 style="margin-top: 1rem;">7-Day Price Forecast</h4><table style="width: 100%; border-collapse: collapse;">';
-        priceTable += '<tr style="background: #2ecc71; color: white;"><th style="padding: 0.5rem;">Date</th><th style="padding: 0.5rem;">Price (₹/quintal)</th></tr>';
-        data.predictions.forEach((pred, idx) => {
-            const bg = idx % 2 === 0 ? '#f9f9f9' : 'white';
-            priceTable += `<tr style="background: ${bg};"><td style="padding: 0.5rem; border: 1px solid #ddd;">${pred.date}</td><td style="padding: 0.5rem; border: 1px solid #ddd;">₹${pred.price.toFixed(2)}</td></tr>`;
-        });
-        priceTable += '</table>';
-        document.getElementById('priceData').innerHTML = priceTable;
-        
-        const advisory = data.advisory;
-        document.getElementById('advisoryContent').innerHTML = `
-            <div class="alert alert-success">
-                <strong><i class="fas fa-cloud-sun"></i> Weather:</strong> ${advisory.weather}
-            </div>
-            <div class="alert alert-warning">
-                <strong><i class="fas fa-bug"></i> Pest Risk:</strong> ${advisory.pest_risk}
-            </div>
-            <div class="alert alert-info">
-                <strong><i class="fas fa-seedling"></i> Sowing Time:</strong> ${advisory.sowing_time}
-            </div>
-            <div class="alert alert-info">
-                <strong><i class="fas fa-tractor"></i> Harvest Time:</strong> ${advisory.harvest_time}
-            </div>
-            <div class="alert alert-success">
-                <strong><i class="fas fa-lightbulb"></i> Tip:</strong> ${advisory.tips}
-            </div>
-        `;
+        renderPriceData(data.predictions);
+        renderAdvisory(data.advisory);
         
         speak(`The predicted price for ${cropType} is ${data.predictions[0].price} rupees per quintal`);
     } catch (error) {
