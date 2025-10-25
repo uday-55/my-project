@@ -143,24 +143,24 @@
     <div class="grid grid-2">
         <div class="form-group">
             <label class="form-label" data-translate="your_name">Your Name</label>
-            <input type="text" id="farmerName" class="form-control" placeholder="Enter your name">
+            <input type="text" id="farmerName" class="form-control" placeholder="Enter your name" data-translate-placeholder="enter_name">
         </div>
         <div class="form-group">
             <label class="form-label" data-translate="crop_type">Crop Type</label>
             <select id="sellCropType" class="form-control">
-                <option value="soybean">Soybean</option>
-                <option value="groundnut">Groundnut</option>
-                <option value="mustard">Mustard</option>
-                <option value="sunflower">Sunflower</option>
+                <option value="soybean" data-translate="soybean">Soybean</option>
+                <option value="groundnut" data-translate="groundnut">Groundnut</option>
+                <option value="mustard" data-translate="mustard">Mustard</option>
+                <option value="sunflower" data-translate="sunflower">Sunflower</option>
             </select>
         </div>
         <div class="form-group">
             <label class="form-label" data-translate="quantity">Quantity (kg)</label>
-            <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" min="0">
+            <input type="number" id="quantity" class="form-control" placeholder="Enter quantity" min="0" data-translate-placeholder="enter_quantity">
         </div>
         <div class="form-group">
             <label class="form-label" data-translate="price">Price (₹/quintal)</label>
-            <input type="number" id="price" class="form-control" placeholder="Enter price" min="0">
+            <input type="number" id="price" class="form-control" placeholder="Enter price" min="0" data-translate-placeholder="enter_price">
         </div>
     </div>
     <button onclick="sellCrop()" class="btn btn-primary">
@@ -178,14 +178,22 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
+<div class="card" id="mapSection" style="scroll-margin-top: 80px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">
         <i class="fas fa-map-marked-alt"></i> <span data-translate="marketplace_map">Marketplace Map - Find Farmers, Buyers & Warehouses</span>
+        <div style="float: right; font-size: 0.9rem;">
+            <i class="fas fa-map-pin"></i> Live Locations
+        </div>
     </div>
     <div class="map-search">
-        <input type="text" id="mapSearch" class="form-control" placeholder="Search for farms, buyers, or warehouses..." onkeyup="searchMap()">
+        <input type="text" id="mapSearch" class="form-control" placeholder="Search for farms, buyers, or warehouses..." onkeyup="searchMap()" data-translate-placeholder="search_map">
     </div>
-    <div id="map"></div>
+    <div id="map" style="min-height: 500px; background: #e0f2f1;">
+        <div style="text-align: center; padding: 200px 20px; color: #666;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #2ecc71;"></i>
+            <p style="margin-top: 1rem;">Loading interactive map...</p>
+        </div>
+    </div>
     <div class="map-legend">
         <div class="legend-item">
             <div class="legend-marker" style="background: #2ecc71;"></div>
@@ -214,7 +222,7 @@
             </div>
         </div>
         <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="chatInput" class="form-control" placeholder="Ask about prices, weather, pests..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <input type="text" id="chatInput" class="form-control" placeholder="Ask about prices, weather, pests..." onkeypress="if(event.key==='Enter') sendMessage()" data-translate-placeholder="chat_placeholder">
             <button onclick="sendMessage()" class="btn btn-primary">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -269,7 +277,22 @@ const translations = {
         soybean: "Soybean",
         groundnut: "Groundnut",
         mustard: "Mustard",
-        sunflower: "Sunflower"
+        sunflower: "Sunflower",
+        enter_name: "Enter your name",
+        enter_quantity: "Enter quantity",
+        enter_price: "Enter price",
+        search_map: "Search for farms, buyers, or warehouses...",
+        chat_placeholder: "Ask about prices, weather, pests...",
+        price_forecast: "7-Day Price Forecast",
+        date: "Date",
+        weather: "Weather",
+        pest_risk: "Pest Risk",
+        sowing_time: "Sowing Time",
+        harvest_time: "Harvest Time",
+        tip: "Tip",
+        success: "Success!",
+        congratulations: "Congratulations! Your badges:",
+        fill_all_fields: "Please fill in all fields"
     },
     hi: {
         farmer_dashboard: "किसान डैशबोर्ड",
@@ -297,7 +320,22 @@ const translations = {
         soybean: "सोयाबीन",
         groundnut: "मूंगफली",
         mustard: "सरसों",
-        sunflower: "सूरजमुखी"
+        sunflower: "सूरजमुखी",
+        enter_name: "अपना नाम दर्ज करें",
+        enter_quantity: "मात्रा दर्ज करें",
+        enter_price: "मूल्य दर्ज करें",
+        search_map: "खेतों, खरीदारों या गोदामों की खोज करें...",
+        chat_placeholder: "मूल्य, मौसम, कीटों के बारे में पूछें...",
+        price_forecast: "7-दिन की मूल्य पूर्वानुमान",
+        date: "तारीख",
+        weather: "मौसम",
+        pest_risk: "कीट जोखिम",
+        sowing_time: "बुवाई का समय",
+        harvest_time: "कटाई का समय",
+        tip: "सुझाव",
+        success: "सफलता!",
+        congratulations: "बधाई हो! आपके बैज:",
+        fill_all_fields: "कृपया सभी फ़ील्ड भरें"
     },
     te: {
         farmer_dashboard: "రైతు డాష్‌బోర్డ్",
@@ -307,7 +345,20 @@ const translations = {
         predict_prices: "ధరలను అంచనా వేయండి",
         crop_advisory: "పంట సలహా",
         ai_assistant: "AI సహాయకుడు",
-        download_report: "నా నివేదికను డౌన్‌లోడ్ చేయండి (PDF)"
+        download_report: "నా నివేదికను డౌన్‌లోడ్ చేయండి (PDF)",
+        soybean: "సోయాబీన్",
+        groundnut: "వేరుశెనగ",
+        mustard: "ఆవాలు",
+        sunflower: "పొద్దుతిరుగుడు",
+        sell_crop: "మీ పంటను అమ్మండి",
+        your_name: "మీ పేరు",
+        crop_type: "పంట రకం",
+        quantity: "పరిమాణం (కిలోలు)",
+        price: "ధర (₹/క్వింటాల్)",
+        marketplace_map: "మార్కెట్ మ్యాప్ - రైతులు, కొనుగోలుదారులు & గిడ్డంగులు",
+        farmers: "🟢 రైతులు",
+        buyers: "🔵 కొనుగోలుదారులు",
+        warehouses: "🟠 మార్కెట్‌లు/గిడ్డంగులు"
     },
     ta: {
         farmer_dashboard: "விவசாயி டாஷ்போர்டு",
@@ -317,16 +368,47 @@ const translations = {
         predict_prices: "விலைகளை முன்னறிவிக்கவும்",
         crop_advisory: "பயிர் ஆலோசனை",
         ai_assistant: "AI உதவியாளர்",
-        download_report: "எனது அறிக்கையைப் பதிவிறக்கவும் (PDF)"
+        download_report: "எனது அறிக்கையைப் பதிவிறக்கவும் (PDF)",
+        soybean: "சோயா",
+        groundnut: "நிலக்கடலை",
+        mustard: "கடுகு",
+        sunflower: "சூரியகாந்தி",
+        sell_crop: "உங்கள் பயிரை விற்கவும்",
+        your_name: "உங்கள் பெயர்",
+        crop_type: "பயிர் வகை",
+        quantity: "அளவு (கிலோ)",
+        price: "விலை (₹/குவிண்டால்)",
+        marketplace_map: "சந்தை வரைபடம் - விவசாயிகள், வாங்குபவர்கள் & கிடங்குகள்",
+        farmers: "🟢 விவசாயிகள்",
+        buyers: "🔵 வாங்குபவர்கள்",
+        warehouses: "🟠 சந்தைகள்/கிடங்குகள்"
     }
 };
 
 function changeLanguage() {
     currentLanguage = document.getElementById('languageSelect').value;
+    
+    // Update text content
     document.querySelectorAll('[data-translate]').forEach(element => {
         const key = element.getAttribute('data-translate');
         if (translations[currentLanguage] && translations[currentLanguage][key]) {
             element.textContent = translations[currentLanguage][key];
+        }
+    });
+    
+    // Update placeholders
+    document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[currentLanguage] && translations[currentLanguage][key]) {
+            element.placeholder = translations[currentLanguage][key];
+        }
+    });
+    
+    // Update select options
+    document.querySelectorAll('select option[data-translate]').forEach(option => {
+        const key = option.getAttribute('data-translate');
+        if (translations[currentLanguage] && translations[currentLanguage][key]) {
+            option.textContent = translations[currentLanguage][key];
         }
     });
 }
@@ -646,9 +728,24 @@ async function sendMessage() {
 }
 
 window.onload = function() {
+    console.log('=== FARMER DASHBOARD LOADING ===');
     predictPrice();
-    initMap();
+    
+    // Initialize map with delay to ensure DOM is ready
+    setTimeout(() => {
+        console.log('Initializing map...');
+        const mapDiv = document.getElementById('map');
+        if (mapDiv) {
+            console.log('Map div found, height:', mapDiv.offsetHeight, 'width:', mapDiv.offsetWidth);
+            initMap();
+            console.log('Map initialized, layers:', map ? Object.keys(map._layers).length : 'none');
+        } else {
+            console.error('Map div not found!');
+        }
+    }, 500);
+    
     initVoice();
+    console.log('=== DASHBOARD LOADED ===');
 };
 </script>
 {% endblock %}

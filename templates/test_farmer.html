@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map and Translation Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #map { height: 400px; width: 100%; margin: 20px 0; border: 2px solid #2ecc71; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+        h2 { color: #2ecc71; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Farmer Dashboard Test Page</h1>
+    
+    <div class="test-section">
+        <h2>1. Language Translation Test</h2>
+        <label>Select Language: </label>
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+        </select>
+        <p>
+            <strong data-translate="farmer_dashboard">Farmer Dashboard</strong><br>
+            <span data-translate="ai_price_predictor">AI Price Predictor</span><br>
+            <input type="text" data-translate-placeholder="enter_name" placeholder="Enter your name" style="margin-top: 10px; padding: 5px;">
+        </p>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Interactive Map Test</h2>
+        <p>Map should appear below with markers for farmers, buyers, and warehouses across India:</p>
+        <div id="map"></div>
+        <div style="margin-top: 10px;">
+            <span style="margin-right: 15px;">🟢 Farmers</span>
+            <span style="margin-right: 15px;">🔵 Buyers</span>
+            <span>🟠 Warehouses</span>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let currentLanguage = 'en';
+        let map;
+        
+        const translations = {
+            en: {
+                farmer_dashboard: "Farmer Dashboard",
+                ai_price_predictor: "AI Price Predictor",
+                enter_name: "Enter your name"
+            },
+            hi: {
+                farmer_dashboard: "किसान डैशबोर्ड",
+                ai_price_predictor: "एआई मूल्य भविष्यवक्ता",
+                enter_name: "अपना नाम दर्ज करें"
+            },
+            te: {
+                farmer_dashboard: "రైతు డాష్‌బోర్డ్",
+                ai_price_predictor: "AI ధర అంచనా",
+                enter_name: "మీ పేరు నమోదు చేయండి"
+            },
+            ta: {
+                farmer_dashboard: "விவசாயி டாஷ்போர்டு",
+                ai_price_predictor: "AI விலை முன்னறிவிப்பு",
+                enter_name: "உங்கள் பெயரை உள்ளிடவும்"
+            }
+        };
+        
+        function changeLanguage() {
+            currentLanguage = document.getElementById('languageSelect').value;
+            
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
+            
+            logResult('✅ Language changed to: ' + currentLanguage);
+        }
+        
+        function initMap() {
+            try {
+                map = L.map('map').setView([20.5937, 78.9629], 5);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 18
+                }).addTo(map);
+                
+                const locations = [
+                    {name: 'Delhi Farmer', lat: 28.6139, lng: 77.2090, color: '#2ecc71', type: 'Farmer'},
+                    {name: 'Mumbai Buyer', lat: 19.0760, lng: 72.8777, color: '#3498db', type: 'Buyer'},
+                    {name: 'Chennai Warehouse', lat: 13.0827, lng: 80.2707, color: '#e67e22', type: 'Warehouse'}
+                ];
+                
+                locations.forEach(loc => {
+                    const icon = L.divIcon({
+                        html: `<div style="background: ${loc.color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>`,
+                        className: '',
+                        iconSize: [20, 20]
+                    });
+                    
+                    L.marker([loc.lat, loc.lng], {icon: icon})
+                        .addTo(map)
+                        .bindPopup(`<strong>${loc.name}</strong><br>Type: ${loc.type}`);
+                });
+                
+                logResult('✅ Map initialized successfully with ' + locations.length + ' markers');
+            } catch (error) {
+                logResult('❌ Map initialization error: ' + error.message);
+            }
+        }
+        
+        function logResult(message) {
+            const div = document.getElementById('testResults');
+            div.innerHTML += '<p style="margin: 5px 0;">' + message + '</p>';
+            console.log(message);
+        }
+        
+        window.onload = function() {
+            logResult('✅ Page loaded');
+            logResult('✅ Leaflet available: ' + (typeof L !== 'undefined' ? 'Yes' : 'No'));
+            initMap();
+        };
+    </script>
+</body>
+</html>

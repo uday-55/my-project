@@ -58,6 +58,10 @@ def admin_dashboard():
     transactions = blockchain.get_all_transactions()
     return render_template('admin.html', stats=stats, insights=insights, transactions=transactions)
 
+@app.route('/test')
+def test_page():
+    return render_template('test_farmer.html')
+
 @app.route('/api/predict-price', methods=['POST'])
 def api_predict_price():
     data = request.json
