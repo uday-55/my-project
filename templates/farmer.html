@@ -78,6 +78,50 @@
     
     .leaflet-popup-content-wrapper {
         border-radius: 8px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    @keyframes markerDrop {
+        0% {
+            transform: translateY(-200px) scale(0);
+            opacity: 0;
+        }
+        60% {
+            transform: translateY(10px) scale(1.1);
+            opacity: 1;
+        }
+        80% {
+            transform: translateY(-5px) scale(0.95);
+        }
+        100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes markerPulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+        }
+    }
+    
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        padding: 0;
+    }
+    
+    .custom-popup .leaflet-popup-content {
+        margin: 12px;
+    }
+    
+    .marker-pin:hover {
+        transform: scale(1.2) !important;
+        transition: transform 0.3s ease;
     }
 </style>
 {% endblock %}
@@ -539,26 +583,65 @@ function speak(text) {
 }
 
 function initMap() {
-    map = L.map('map').setView([20.5937, 78.9629], 5);
+    map = L.map('map', {
+        zoomControl: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        touchZoom: true
+    }).setView([20.5937, 78.9629], 5);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
+        maxZoom: 18,
+        minZoom: 4
     }).addTo(map);
     
     const locations = [
-        {type: 'farmer', name: 'Ram Kumar Farm', lat: 28.6139, lng: 77.2090, crop: 'Soybean, Mustard', icon: '🟢'},
-        {type: 'farmer', name: 'Lakshmi Agro', lat: 19.0760, lng: 72.8777, crop: 'Groundnut', icon: '🟢'},
-        {type: 'farmer', name: 'Suresh Organic Farm', lat: 13.0827, lng: 80.2707, crop: 'Sunflower', icon: '🟢'},
-        {type: 'farmer', name: 'Ganesh Farms', lat: 17.3850, lng: 78.4867, crop: 'Soybean', icon: '🟢'},
-        {type: 'farmer', name: 'Rajesh Crops', lat: 22.5726, lng: 88.3639, crop: 'Mustard', icon: '🟢'},
-        {type: 'buyer', name: 'ABC Oil Mills', lat: 28.4595, lng: 77.0266, demand: 'All Oilseeds', icon: '🔵'},
-        {type: 'buyer', name: 'Premium Processors', lat: 12.9716, lng: 77.5946, demand: 'Groundnut, Sunflower', icon: '🔵'},
-        {type: 'buyer', name: 'Golden Oil Industries', lat: 23.0225, lng: 72.5714, demand: 'Soybean', icon: '🔵'},
-        {type: 'warehouse', name: 'Central Warehouse Delhi', lat: 28.7041, lng: 77.1025, capacity: '5000 tonnes', icon: '🟠'},
-        {type: 'warehouse', name: 'Maharashtra Storage Hub', lat: 19.2183, lng: 72.9781, capacity: '8000 tonnes', icon: '🟠'},
-        {type: 'warehouse', name: 'South India Depot', lat: 13.0569, lng: 80.2425, capacity: '6000 tonnes', icon: '🟠'},
-        {type: 'warehouse', name: 'Telangana FPO Center', lat: 17.4474, lng: 78.3742, capacity: '4500 tonnes', icon: '🟠'}
+        // North India Farmers
+        {type: 'farmer', name: 'Ram Kumar Farm', lat: 28.6139, lng: 77.2090, crop: 'Soybean, Mustard', location: 'Delhi', icon: '🟢'},
+        {type: 'farmer', name: 'Punjab Agro Farm', lat: 30.7333, lng: 76.7794, crop: 'Mustard, Sunflower', location: 'Chandigarh', icon: '🟢'},
+        {type: 'farmer', name: 'Haryana Oilseeds', lat: 29.0588, lng: 76.0856, crop: 'Mustard', location: 'Rohtak', icon: '🟢'},
+        {type: 'farmer', name: 'Rajasthan Farms', lat: 26.9124, lng: 75.7873, crop: 'Mustard, Groundnut', location: 'Jaipur', icon: '🟢'},
+        
+        // West India Farmers
+        {type: 'farmer', name: 'Lakshmi Agro', lat: 19.0760, lng: 72.8777, crop: 'Groundnut', location: 'Mumbai', icon: '🟢'},
+        {type: 'farmer', name: 'Gujarat Oilseeds Co', lat: 23.0225, lng: 72.5714, crop: 'Groundnut, Soybean', location: 'Ahmedabad', icon: '🟢'},
+        {type: 'farmer', name: 'Nashik Valley Farms', lat: 19.9975, lng: 73.7898, crop: 'Soybean', location: 'Nashik', icon: '🟢'},
+        
+        // South India Farmers
+        {type: 'farmer', name: 'Suresh Organic Farm', lat: 13.0827, lng: 80.2707, crop: 'Sunflower, Groundnut', location: 'Chennai', icon: '🟢'},
+        {type: 'farmer', name: 'Karnataka Agro', lat: 12.9716, lng: 77.5946, crop: 'Sunflower', location: 'Bangalore', icon: '🟢'},
+        {type: 'farmer', name: 'Kerala Oilseed Farm', lat: 10.8505, lng: 76.2711, crop: 'Groundnut', location: 'Palakkad', icon: '🟢'},
+        {type: 'farmer', name: 'Guntur Farms', lat: 16.3067, lng: 80.4365, crop: 'Sunflower, Groundnut', location: 'Guntur', icon: '🟢'},
+        
+        // Central India Farmers
+        {type: 'farmer', name: 'Ganesh Farms', lat: 17.3850, lng: 78.4867, crop: 'Soybean', location: 'Hyderabad', icon: '🟢'},
+        {type: 'farmer', name: 'MP Soybean Hub', lat: 23.2599, lng: 77.4126, crop: 'Soybean', location: 'Bhopal', icon: '🟢'},
+        {type: 'farmer', name: 'Vidarbha Oilseeds', lat: 21.1458, lng: 79.0882, crop: 'Soybean, Sunflower', location: 'Nagpur', icon: '🟢'},
+        
+        // East India Farmers
+        {type: 'farmer', name: 'Rajesh Crops', lat: 22.5726, lng: 88.3639, crop: 'Mustard, Groundnut', location: 'Kolkata', icon: '🟢'},
+        {type: 'farmer', name: 'Odisha Agro Farm', lat: 20.2961, lng: 85.8245, crop: 'Mustard', location: 'Bhubaneswar', icon: '🟢'},
+        {type: 'farmer', name: 'Bihar Oilseeds', lat: 25.5941, lng: 85.1376, crop: 'Mustard, Sunflower', location: 'Patna', icon: '🟢'},
+        
+        // Buyers
+        {type: 'buyer', name: 'ABC Oil Mills', lat: 28.4595, lng: 77.0266, demand: 'All Oilseeds', location: 'Gurgaon', icon: '🔵'},
+        {type: 'buyer', name: 'Premium Processors', lat: 12.9716, lng: 77.5946, demand: 'Groundnut, Sunflower', location: 'Bangalore', icon: '🔵'},
+        {type: 'buyer', name: 'Golden Oil Industries', lat: 23.0225, lng: 72.5714, demand: 'Soybean', location: 'Ahmedabad', icon: '🔵'},
+        {type: 'buyer', name: 'Mumbai Oil Traders', lat: 19.0760, lng: 72.8777, demand: 'All Oilseeds', location: 'Mumbai', icon: '🔵'},
+        {type: 'buyer', name: 'South India Mills', lat: 13.0827, lng: 80.2707, demand: 'Sunflower, Groundnut', location: 'Chennai', icon: '🔵'},
+        {type: 'buyer', name: 'Bengal Processors', lat: 22.5726, lng: 88.3639, demand: 'Mustard', location: 'Kolkata', icon: '🔵'},
+        {type: 'buyer', name: 'Telangana Oil Co', lat: 17.3850, lng: 78.4867, demand: 'Soybean, Sunflower', location: 'Hyderabad', icon: '🔵'},
+        
+        // Warehouses
+        {type: 'warehouse', name: 'Central Warehouse Delhi', lat: 28.7041, lng: 77.1025, capacity: '5000 tonnes', location: 'Delhi', icon: '🟠'},
+        {type: 'warehouse', name: 'Maharashtra Storage Hub', lat: 19.2183, lng: 72.9781, capacity: '8000 tonnes', location: 'Navi Mumbai', icon: '🟠'},
+        {type: 'warehouse', name: 'South India Depot', lat: 13.0569, lng: 80.2425, capacity: '6000 tonnes', location: 'Chennai', icon: '🟠'},
+        {type: 'warehouse', name: 'Telangana FPO Center', lat: 17.4474, lng: 78.3742, capacity: '4500 tonnes', location: 'Secunderabad', icon: '🟠'},
+        {type: 'warehouse', name: 'Gujarat Storage', lat: 23.0300, lng: 72.5500, capacity: '7000 tonnes', location: 'Ahmedabad', icon: '🟠'},
+        {type: 'warehouse', name: 'West Bengal Hub', lat: 22.5800, lng: 88.4200, capacity: '5500 tonnes', location: 'Kolkata', icon: '🟠'},
+        {type: 'warehouse', name: 'Karnataka Storage', lat: 12.9800, lng: 77.6000, capacity: '6500 tonnes', location: 'Bangalore', icon: '🟠'},
+        {type: 'warehouse', name: 'MP Central Hub', lat: 23.2700, lng: 77.4100, capacity: '7500 tonnes', location: 'Bhopal', icon: '🟠'}
     ];
     
     locations.forEach((loc, index) => {
@@ -566,44 +649,103 @@ function initMap() {
             let color = loc.type === 'farmer' ? '#2ecc71' : loc.type === 'buyer' ? '#3498db' : '#e67e22';
             
             const icon = L.divIcon({
-                html: `<div style="background: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+                html: `<div class="marker-pin" style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4); position: relative; animation: markerDrop 0.5s ease-out, markerPulse 2s infinite;"></div>`,
                 className: '',
-                iconSize: [24, 24]
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
             });
             
-            let popupContent = `<strong>${loc.name}</strong><br>`;
-            if (loc.type === 'farmer') popupContent += `<em>Crops:</em> ${loc.crop}`;
-            else if (loc.type === 'buyer') popupContent += `<em>Demand:</em> ${loc.demand}`;
-            else if (loc.type === 'warehouse') popupContent += `<em>Capacity:</em> ${loc.capacity}`;
+            let popupContent = `
+                <div style="min-width: 200px; font-family: 'Poppins', sans-serif;">
+                    <h4 style="margin: 0 0 8px 0; color: ${color}; font-size: 1.1rem;">
+                        ${loc.icon} ${loc.name}
+                    </h4>
+                    <p style="margin: 4px 0; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-map-marker-alt"></i> <strong>${loc.location}</strong>
+                    </p>`;
+            
+            if (loc.type === 'farmer') {
+                popupContent += `<p style="margin: 4px 0; color: #2ecc71;"><i class="fas fa-seedling"></i> <strong>Crops:</strong> ${loc.crop}</p>`;
+            } else if (loc.type === 'buyer') {
+                popupContent += `<p style="margin: 4px 0; color: #3498db;"><i class="fas fa-shopping-cart"></i> <strong>Buying:</strong> ${loc.demand}</p>`;
+            } else if (loc.type === 'warehouse') {
+                popupContent += `<p style="margin: 4px 0; color: #e67e22;"><i class="fas fa-warehouse"></i> <strong>Capacity:</strong> ${loc.capacity}</p>`;
+            }
+            
+            popupContent += `</div>`;
             
             const marker = L.marker([loc.lat, loc.lng], {icon: icon})
                 .addTo(map)
-                .bindPopup(popupContent);
+                .bindPopup(popupContent, {
+                    maxWidth: 300,
+                    className: 'custom-popup'
+                });
+            
+            marker.on('click', function() {
+                map.flyTo([loc.lat, loc.lng], 10, {
+                    duration: 1.5,
+                    easeLinearity: 0.25
+                });
+            });
             
             markers.push({marker: marker, data: loc});
-        }, index * 100);
+        }, index * 80);
     });
+    
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 1000);
 }
 
 function searchMap() {
-    const searchTerm = document.getElementById('mapSearch').value.toLowerCase();
+    const searchTerm = document.getElementById('mapSearch').value.toLowerCase().trim();
+    let foundMarkers = [];
     
     markers.forEach(({marker, data}) => {
         const matchesSearch = !searchTerm || 
             data.name.toLowerCase().includes(searchTerm) ||
+            data.type.toLowerCase().includes(searchTerm) ||
+            (data.location && data.location.toLowerCase().includes(searchTerm)) ||
             (data.crop && data.crop.toLowerCase().includes(searchTerm)) ||
-            (data.demand && data.demand.toLowerCase().includes(searchTerm));
+            (data.demand && data.demand.toLowerCase().includes(searchTerm)) ||
+            (data.capacity && data.capacity.toLowerCase().includes(searchTerm));
         
         if (matchesSearch) {
             marker.setOpacity(1);
-            if (searchTerm && matchesSearch) {
-                marker.openPopup();
-                map.setView(marker.getLatLng(), 8);
+            foundMarkers.push({marker, data});
+            
+            if (searchTerm && foundMarkers.length === 1) {
+                setTimeout(() => {
+                    map.flyTo(marker.getLatLng(), 10, {
+                        duration: 1.5,
+                        easeLinearity: 0.25
+                    });
+                    marker.openPopup();
+                }, 300);
             }
         } else {
             marker.setOpacity(0.3);
+            marker.closePopup();
         }
     });
+    
+    if (searchTerm && foundMarkers.length > 1) {
+        const bounds = L.latLngBounds(foundMarkers.map(({marker}) => marker.getLatLng()));
+        setTimeout(() => {
+            map.flyToBounds(bounds, {
+                padding: [50, 50],
+                duration: 1.5,
+                easeLinearity: 0.25
+            });
+        }, 300);
+    }
+    
+    if (!searchTerm) {
+        map.flyTo([20.5937, 78.9629], 5, {
+            duration: 1.5,
+            easeLinearity: 0.25
+        });
+    }
 }
 
 function toggleChat() {
