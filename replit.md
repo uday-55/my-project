@@ -63,15 +63,28 @@ Create a visually appealing, interactive, and informative prototype that demonst
 
 ### 10. Interactive Geographic Map
 - Leaflet.js with OpenStreetMap integration
-- Visual markers for:
-  - 🟢 Farmers (green) - showing crop types
-  - 🔵 Buyers (blue) - showing demand
-  - 🟠 Marketplaces/Warehouses (orange) - showing capacity
-- Search functionality to find nearby farms, buyers, or warehouses
-- Popup information cards with location details
-- Smooth animations and zoom controls
+- 32 strategically placed locations across India:
+  - 17 Farmers across North, South, East, West, and Central India
+  - 7 Buyers in major processing hubs
+  - 8 Warehouses/Storage facilities
+- Visual markers with smooth animations:
+  - 🟢 Farmers (green) - showing crop types and location
+  - 🔵 Buyers (blue) - showing demand and location
+  - 🟠 Marketplaces/Warehouses (orange) - showing capacity and location
+- Advanced search functionality:
+  - Search by name, type, location, crop, demand, or capacity
+  - Auto-zoom to single results
+  - Fit bounds for multiple results
+  - Animated transitions with flyTo effects
+- Interactive features:
+  - Click markers to zoom in with smooth animation (1.5s duration)
+  - Enhanced popups with location details, icons, and formatted info
+  - Marker drop animations on load
+  - Continuous pulse animations for visibility
+  - Hover effects with scale transformation
 - Responsive design matching dashboard theme
-- Centered on India with pan and zoom capabilities
+- Centered on India (lat: 20.5937, lng: 78.9629) with pan and zoom capabilities
+- Map controls: zoom buttons, scroll wheel zoom, double-click zoom, touch zoom
 
 ## Project Structure
 
